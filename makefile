@@ -1,6 +1,6 @@
 CC = gcc -Wall -lgdbm
 
-OBJS = bin/main.o
+OBJS = bin/main.o bin/posts.o
 
 bbs: $(OBJS)
 	$(CC) $(OBJS) -o bbs

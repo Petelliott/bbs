@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
+#include "posts.h"
 
 #define TELENT_PORT 23
 
