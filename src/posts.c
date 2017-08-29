@@ -24,6 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 
 
+/*
+    opens the provided files and configures the mutex
+    this allows fds to be used as one db system
+*/
 void posts_db_init(struct post_fds *fds, char *meta_path, char *post_path) {
     fds->meta_fd = open(meta_path, O_RDWR|O_APPEND|O_CREAT, 0600);
     fds->post_fd = open(post_path, O_RDWR|O_APPEND|O_CREAT, 0600);
@@ -31,12 +35,20 @@ void posts_db_init(struct post_fds *fds, char *meta_path, char *post_path) {
 }
 
 
+/*
+    closes the files of fds
+*/
 void posts_db_close(struct post_fds *fds) {
     close(fds->meta_fd);
     close(fds->post_fd);
 }
 
 
+/*
+    gets post number $(num) from fds writing the meta data to $(block)
+    and copying the data to a newly mallocd pointer and returning it.
+    the data returned is null terminated and MUST be freed
+*/
 char *get_post(struct post_fds* fds, struct meta_block *block, unsigned long num) {
     get_post_meta(fds, block, num);
 
@@ -51,6 +63,9 @@ char *get_post(struct post_fds* fds, struct meta_block *block, unsigned long num
 }
 
 
+/*
+    gets only the metadata of post $(num), copyying it to $(block)
+*/
 void get_post_meta(struct post_fds* fds, struct meta_block *block, unsigned long num) {
     pthread_mutex_lock(&fds->mutex);
     lseek(fds->meta_fd, sizeof(struct meta_block)*num, SEEK_SET);
@@ -59,6 +74,9 @@ void get_post_meta(struct post_fds* fds, struct meta_block *block, unsigned long
 }
 
 
+/*
+    create a new post inserted at the end of fds.
+*/
 void post(struct post_fds* fds, char *name, char *title, char *data, unsigned long len) {
     pthread_mutex_lock(&fds->mutex);
 

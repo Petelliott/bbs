@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _POSTS_H
 #define _POSTS_H
 
+// its best to keep these 8 bit aligned
 #define TITLE_LEN 32
 #define NAME_LEN 24
 
@@ -38,6 +39,7 @@ struct meta_block {
 void posts_db_init(struct post_fds *fds, char *meta_path, char *post_path);
 void posts_db_close(struct post_fds *fds);
 
+// all functions are thread safe
 char *get_post(struct post_fds* fds, struct meta_block *block, unsigned long num);
 void get_post_meta(struct post_fds* fds, struct meta_block *block, unsigned long num);
 
