@@ -1,6 +1,6 @@
-CC = gcc -Wall -lgdbm
+CC = gcc -Wall -lgdbm -lcrypt
 
-OBJS = bin/main.o bin/posts.o
+OBJS = bin/main.o bin/posts.o bin/login.o
 
 bbs: $(OBJS)
 	$(CC) $(OBJS) -o bbs
