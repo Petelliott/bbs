@@ -22,7 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
-#include "posts.h"
+#include <pthread.h>
+#include <time.h>
+#include "client.h"
+#include <poll.h>
 
 #define TELENT_PORT 23
 
@@ -53,12 +56,20 @@ int main() {
         return 1;
     }
 
+    srand(time(NULL)); // used by logindb
+
+    struct logindb l_db;
+    logindb_init(&ldb, "bbs_login.db");
+    struct post_fds p_db;
+    posts_db_init(&p_db, "bbs_post_meta.db", "bbs_post_db.db");
+
     while (1) {
         struct sockaddr_in client;
         socklen_t client_len = sizeof(client);
         int client_fd = accept(server_fd, (struct sockaddr *) &client, &client_len);
 
-        write(client_fd, "hi\n", 3);
+        pthread_t new_cli_thread;
+        pthread_create(&new_cli_thread, NULL, client_thread, client_fd, &l_db, &p_db);
     }
 
     return 0;

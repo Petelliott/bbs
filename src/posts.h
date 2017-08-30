@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _POSTS_H
 #define _POSTS_H
 
+#include <pthread.h>
+
 // its best to keep these 8 bit aligned
 #define TITLE_LEN 32
 #define NAME_LEN 24
