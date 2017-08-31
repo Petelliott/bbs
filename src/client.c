@@ -23,6 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 
 
+/*
+    reads a line from a file descripter as a null terminated string.
+    buff is required to be consistent and should be MAX_LINE_SIZE
+    buff_idx should be initialized to 0
+    the newline will not be included in the returned string
+*/
 char *readline(int sock_fd, char *buff, size_t *buff_idx) {
     struct pollfd polls;
     polls.fd = sock_fd;
@@ -31,27 +37,65 @@ char *readline(int sock_fd, char *buff, size_t *buff_idx) {
     while (1) {
         poll(&polls, 1, -1);
 
-        int res = read(sock_fd, buff+*buff_idx, MAX_LINE_SIZE-*buff_idx);
+        int read_len = read(sock_fd, buff+*buff_idx, MAX_LINE_SIZE-*buff_idx);
 
-        if (res < 0) {
+        if (read_len < 0) {
             perror("read(2)");
         }
 
-        for (size_t i = *buff_idx; i < (*buff_idx+res); ++i) {
-            if (buff[i] == '\n') {
-                char *output = malloc(i+2);
-                memcpy(output, buff, i+1);
-                output[i+1] = 0;
+        for (size_t i = *buff_idx; i < (*buff_idx+read_len); ++i) {
+            if (buff[i] == '\r') {
+                char *output = malloc(i+1);
+                memcpy(output, buff, i);
+                output[i] = 0;
 
                 *buff_idx = 0;
                 return output;
             }
         }
-        *buff_idx += res;
+        *buff_idx += read_len;
     }
 }
 
 
-void client_thread(int sock_fd, struct logindb *l_db, struct post_fds* posts) {
+// TODO: this is a terrible bandaid
+void skip_telnet(int fd) {
+    char telnet_data[28];
+    read(fd, telnet_data, 28);
+}
 
+
+void *client_thread(void *args) {
+
+    int sock_fd = ((struct ct_args *) args)->sock_fd;
+    struct logindb *l_db = ((struct ct_args *) args)->l_db;
+    struct post_fds *posts = ((struct ct_args *) args)->posts;
+    free(args);
+
+    skip_telnet(sock_fd); //TODO: remove asap
+
+    char linebuff[1024];
+    size_t buff_idx = 0;
+
+    // username and password prompt
+    dprintf(sock_fd, "user: ");
+    char *username = readline(sock_fd, linebuff, &buff_idx);
+    dprintf(sock_fd, "pass: ");
+    char *password = readline(sock_fd, linebuff, &buff_idx);
+
+    if (!login(l_db, username, password)) {
+        free(username);
+        free(password);
+        close(sock_fd);
+        return NULL;
+    }
+
+    printf("%s has logged in\n", username);
+    dprintf(sock_fd, "welcome, %s\n", username);
+
+    free(username);
+    free(password);
+    close(sock_fd);
+
+    return NULL;
 }

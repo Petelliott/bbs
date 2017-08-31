@@ -23,6 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define MAX_LINE_SIZE 1024
 
-void client_thread(int sock_fd, struct logindb *l_db, struct post_fds* posts);
+struct ct_args {
+    int sock_fd;
+    struct logindb *l_db;
+    struct post_fds *posts;
+};
+
+void *client_thread(void *args);
 
 #endif
