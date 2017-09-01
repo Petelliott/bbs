@@ -63,8 +63,6 @@ int main() {
     struct post_fds p_db;
     posts_db_init(&p_db, "bbs_post_meta.db", "bbs_post_db.db");
 
-    add_login(&l_db, "peter", "pass5");
-
     while (1) {
         struct sockaddr_in client;
         socklen_t client_len = sizeof(client);
