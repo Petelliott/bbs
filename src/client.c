@@ -178,6 +178,15 @@ void *client_thread(void *args) {
             printf("%s has left\n", username);
             free(command);
             break;
+        } else if (strncmp(op, "list", 4) == 0) {
+            size_t n_posts = atoi(strtok_r(NULL, " ", &saveptr));
+            unsigned long post_num = post_head(posts);
+
+            for (size_t i = 0; i < n_posts && post_num >= i; ++i) {
+                struct meta_block block;
+                get_post_meta(posts, &block, post_num-i);
+                dprintf(sock_fd, "#%lu: %s '%s' %li\r\n", post_num-i, block.name, block.title, block.timestamp);
+            }
         }
 
         free(command);

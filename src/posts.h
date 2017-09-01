@@ -47,4 +47,6 @@ void get_post_meta(struct post_fds* fds, struct meta_block *block, unsigned long
 
 void post(struct post_fds* fds, char *name, char *title, char *data, unsigned long len);
 
+unsigned long post_head(struct post_fds* fds);
+
 #endif

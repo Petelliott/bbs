@@ -91,3 +91,12 @@ void post(struct post_fds* fds, char *name, char *title, char *data, unsigned lo
 
     pthread_mutex_unlock(&fds->mutex);
 }
+
+
+/*
+    gets the number of the most recent post
+*/
+unsigned long post_head(struct post_fds* fds) {
+    unsigned long end = lseek(fds->meta_fd, 0, SEEK_END);
+    return end / sizeof(struct meta_block) - 1;
+}
