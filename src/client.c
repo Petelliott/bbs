@@ -93,6 +93,63 @@ void *client_thread(void *args) {
     printf("%s has logged in\n", username);
     dprintf(sock_fd, "welcome, %s\n", username);
 
+
+    while (1) {
+        dprintf(sock_fd, "> ");
+
+        char *command = readline(sock_fd, linebuff, &buff_idx);
+
+        char *saveptr;
+        char *op = strtok_r(command, " ", &saveptr);
+
+        if (strncmp(op, "write", 5) == 0) {
+            int n_newlines = 0;
+            char post_txt[32768];
+            size_t idx = 0;
+
+            dprintf(sock_fd, "title: ");
+            char *title = readline(sock_fd, linebuff, &buff_idx);
+
+            while (n_newlines < 2) {
+                char *line = readline(sock_fd, linebuff, &buff_idx);
+                size_t line_len = strlen(line);
+                memcpy(post_txt+idx, line, line_len);
+                memcpy(post_txt+idx+line_len, "\r\n", 2);
+
+                idx += line_len + 2;
+
+                if (line_len == 0) {
+                    ++n_newlines;
+                } else {
+                    n_newlines = 0;
+                }
+                free(line);
+            }
+
+            idx -= 4; // remove the last two newlines
+
+            post(posts, username, title, post_txt, idx);
+            free(title);
+
+        } else if (strncmp(op, "read", 4) == 0) {
+            unsigned long post_num = atoi(strtok_r(NULL, " ", &saveptr));
+
+            struct meta_block block;
+            char *post_txt = get_post(posts, &block, post_num);
+
+            dprintf(sock_fd, "\e[1m#%lu: %s '%s' %li\r\n\e[0m", post_num, block.name, block.title, block.timestamp);
+            write(sock_fd, post_txt, block.len);
+            free(post_txt);
+
+        } else if (strncmp(op, "exit", 4) == 0) {
+            printf("%s has left\n", username);
+            free(command);
+            break;
+        }
+
+        free(command);
+    }
+
     free(username);
     free(password);
     close(sock_fd);
