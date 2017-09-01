@@ -57,6 +57,39 @@ char *readline(int sock_fd, char *buff, size_t *buff_idx) {
     }
 }
 
+// TODO: FIGURE OUT TELNET LINEMODES
+// const char echo_off[] = {255, 251, 1};
+// const char echo_on[]  = {255, 252, 1, 255, 254, 34};
+//
+//
+// char *read_password_telnet(int sock_fd) {
+//     char *password = malloc(512); // TODO: magic number
+//     size_t p_idx = 0;
+//
+//     char nothing[6];
+//     write(sock_fd, echo_off, 3);
+//     read(sock_fd, nothing, 3);
+//
+//     char c;
+//     while (1) {
+//         read(sock_fd, &c, 1);
+//         if (c == '\r') {
+//             read(sock_fd, &c, 1); // expect newline
+//             dprintf(sock_fd, "\r\n");
+//             break;
+//         }
+//
+//         write(sock_fd, "*", 1);
+//         password[p_idx] = c;
+//         ++p_idx;
+//     }
+//
+//     password[p_idx] = 0;
+//     write(sock_fd, echo_on, 6);
+//     read(sock_fd, nothing, 6);
+//     return password;
+// }
+
 
 // TODO: this is a terrible bandaid
 void skip_telnet(int fd) {
