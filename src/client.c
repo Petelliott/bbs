@@ -98,6 +98,11 @@ void skip_telnet(int fd) {
 }
 
 
+/*
+    client thread is a pthread running client telnet interactions
+    args is of type struct ct_args *
+    the return value is always NULL
+*/
 void *client_thread(void *args) {
 
     int sock_fd = ((struct ct_args *) args)->sock_fd;
@@ -117,17 +122,23 @@ void *client_thread(void *args) {
     char *password = readline(sock_fd, linebuff, &buff_idx);
 
     if (!login(l_db, username, password)) {
-        free(username);
-        free(password);
-        close(sock_fd);
-        return NULL;
+        // try to create a new account
+        if (add_login(l_db, username, password)) {
+            dprintf(sock_fd, "creating account...\r\n");
+        } else {
+            dprintf(sock_fd, "invalid username and password\r\n");
+            free(username);
+            free(password);
+            close(sock_fd);
+            return NULL;
+        }
     }
 
     printf("%s has logged in\n", username);
     dprintf(sock_fd, "welcome, %s\n", username);
 
 
-    while (1) {
+    while (1) { // COMMAND LOOP
         dprintf(sock_fd, "> ");
 
         char *command = readline(sock_fd, linebuff, &buff_idx);
@@ -135,7 +146,7 @@ void *client_thread(void *args) {
         char *saveptr;
         char *op = strtok_r(command, " ", &saveptr);
 
-        if (strncmp(op, "write", 5) == 0) {
+        if (strncmp(op, "write", 5) == 0) { // WRITE COMMAND
             int n_newlines = 0;
             char post_txt[32768];
             size_t idx = 0;
@@ -164,7 +175,7 @@ void *client_thread(void *args) {
             post(posts, username, title, post_txt, idx);
             free(title);
 
-        } else if (strncmp(op, "read", 4) == 0) {
+        } else if (strncmp(op, "read", 4) == 0) { // READ COMMAND
             char *arg1 = strtok_r(NULL, " ", &saveptr);
             unsigned long post_num;
             if (arg1 == NULL) {
@@ -181,12 +192,12 @@ void *client_thread(void *args) {
             write(sock_fd, post_txt, block.len);
             free(post_txt);
 
-        } else if (strncmp(op, "exit", 4) == 0) {
+        } else if (strncmp(op, "exit", 4) == 0) { // EXIT COMMAND
             printf("%s has left\n", username);
             free(command);
             break;
 
-        } else if (strncmp(op, "list", 4) == 0) {
+        } else if (strncmp(op, "list", 4) == 0) { // LIST COMMAND
             char *arg1 = strtok_r(NULL, " ", &saveptr);
             size_t n_posts;
             if (arg1 == NULL) {
