@@ -165,7 +165,14 @@ void *client_thread(void *args) {
             free(title);
 
         } else if (strncmp(op, "read", 4) == 0) {
-            unsigned long post_num = atoi(strtok_r(NULL, " ", &saveptr));
+            char *arg1 = strtok_r(NULL, " ", &saveptr);
+            unsigned long post_num;
+            if (arg1 == NULL) {
+                post_num = post_head(posts);
+            } else {
+                post_num = atoi(arg1);
+            }
+
 
             struct meta_block block;
             char *post_txt = get_post(posts, &block, post_num);
@@ -178,8 +185,16 @@ void *client_thread(void *args) {
             printf("%s has left\n", username);
             free(command);
             break;
+
         } else if (strncmp(op, "list", 4) == 0) {
-            size_t n_posts = atoi(strtok_r(NULL, " ", &saveptr));
+            char *arg1 = strtok_r(NULL, " ", &saveptr);
+            size_t n_posts;
+            if (arg1 == NULL) {
+                n_posts = 10;
+            } else {
+                n_posts = atoi(arg1);
+            }
+
             unsigned long post_num = post_head(posts);
 
             for (size_t i = 0; i < n_posts && post_num >= i; ++i) {
