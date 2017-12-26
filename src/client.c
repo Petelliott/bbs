@@ -121,6 +121,12 @@ void *client_thread(void *args) {
     dprintf(sock_fd, "pass: ");
     char *password = readline(sock_fd, linebuff, &buff_idx);
 
+    if (username == NULL || password == NULL) {
+        free(username);
+        free(password);
+        return NULL;
+    }
+
     if (!login(l_db, username, password)) {
         // try to create a new account
         if (add_login(l_db, username, password)) {
