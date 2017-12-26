@@ -35,12 +35,12 @@ char *readline(int sock_fd, char *buff, size_t *buff_idx) {
     polls.events = POLLIN | POLLPRI;
 
     while (1) {
-        poll(&polls, 1, -1);
+        poll(&polls, 1, 30);
 
         int read_len = read(sock_fd, buff+*buff_idx, MAX_LINE_SIZE-*buff_idx);
 
-        if (read_len < 0) {
-            perror("read(2)");
+        if (read_len <= 0) {
+            return NULL;
         }
 
         for (size_t i = *buff_idx; i < (*buff_idx+read_len); ++i) {
@@ -142,6 +142,11 @@ void *client_thread(void *args) {
         dprintf(sock_fd, "> ");
 
         char *command = readline(sock_fd, linebuff, &buff_idx);
+
+        if (command == NULL) {
+            printf("%s has disconnected\n", username);
+            break;
+        }
 
         char *saveptr;
         char *op = strtok_r(command, " ", &saveptr);

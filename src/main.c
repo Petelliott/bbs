@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define MAX_CONNS 32
 
+
 int main() {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
@@ -67,6 +68,10 @@ int main() {
         struct sockaddr_in client;
         socklen_t client_len = sizeof(client);
         int client_fd = accept(server_fd, (struct sockaddr *) &client, &client_len);
+
+        if (client_fd < 0) {
+            perror("accept(2)");
+        }
 
         struct ct_args *args = malloc(sizeof(struct ct_args));
         args->sock_fd = client_fd;
