@@ -217,9 +217,10 @@ void *client_thread(void *args) {
                 n_posts = atoi(arg1);
             }
 
-            unsigned long post_num = post_head(posts);
+            long post_num = post_head(posts);
+            printf("post_num: %li\n", post_num);
 
-            for (size_t i = 0; i < n_posts && post_num >= i; ++i) {
+            for (ssize_t i = 0; i < n_posts && post_num >= i; ++i) {
                 struct meta_block block;
                 get_post_meta(posts, &block, post_num-i);
                 dprintf(sock_fd, "#%lu: %s '%s' %li\r\n", post_num-i, block.name, block.title, block.timestamp);
