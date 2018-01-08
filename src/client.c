@@ -218,7 +218,6 @@ void *client_thread(void *args) {
             }
 
             long post_num = post_head(posts);
-            printf("post_num: %li\n", post_num);
 
             for (ssize_t i = 0; i < n_posts && post_num >= i; ++i) {
                 struct meta_block block;

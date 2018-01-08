@@ -56,6 +56,8 @@ int main() {
         perror("listen(2)");
         return 1;
     }
+    
+    printf("starting server\n");
 
     srand(time(NULL)); // used by logindb
 
